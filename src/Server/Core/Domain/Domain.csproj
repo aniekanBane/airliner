@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" Version="7.0.0" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="NodaTime" Version="3.1.9" />
+    <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.1.2" />
+  </ItemGroup>
+
 </Project>
