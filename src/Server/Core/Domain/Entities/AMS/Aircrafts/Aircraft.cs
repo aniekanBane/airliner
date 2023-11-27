@@ -115,7 +115,7 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
 
     private bool CanAddCabin(int capacity)
     {
-        return (Capacity - Cabins.Sum(x => x.Capacity)) > capacity;
+        return capacity <= (Capacity - Cabins.Sum(x => x.Capacity));
     }
 }
 
