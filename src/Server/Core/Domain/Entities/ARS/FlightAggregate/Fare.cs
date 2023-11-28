@@ -37,7 +37,7 @@ public sealed record class Fare
 
     public int? AvailableSeats => _availableSeats;
 
-    public IEnumerable<string> FareRules => _fareRules.AsReadOnly();
+    public IList<string> FareRules => _fareRules.AsReadOnly();
 
     public static Fare Create(
         decimal price, 
