@@ -45,7 +45,7 @@ public sealed class Airport : AuditableEntity<Guid>
 
     public string CityId { get; private set; } = default!;
 
-    public IEnumerable<string> Terminals => _terminals.AsReadOnly();
+    public IList<string> Terminals => _terminals.AsReadOnly();
 
     public static Airport Create(
         bool isHub,

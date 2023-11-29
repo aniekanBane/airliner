@@ -34,7 +34,7 @@ public sealed class City : AuditableEntity<string>, IAggregateRoot
 
     public IReadOnlyCollection<Airport> Airports => _airports.AsReadOnly();
 
-    public IEnumerable<string> Images => _images.AsReadOnly();
+    public IList<string> Images => _images.AsReadOnly();
 
     public static City Create(
         string name, 
