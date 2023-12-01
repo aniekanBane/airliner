@@ -5,16 +5,20 @@ using Domain.Primitives.Repositories;
 
 namespace Persistence.Repositories;
 
-internal abstract class Repository<TEntity>
+internal abstract class Repository<TEntity, TDbContext>
     : RepositoryBase<TEntity>, IReadRepository<TEntity>, IWriteRepository<TEntity>
     where TEntity : class, IEntity, IAggregateRoot
+    where TDbContext : DbContext, IUnitOfWork
 {
     protected readonly DbSet<TEntity> _dbset;
 
-    protected Repository(DbContext dbContext) : base(dbContext)
+    protected Repository(TDbContext dbContext) : base(dbContext)
     {
+        UnitOfWork = dbContext;
         _dbset = dbContext.Set<TEntity>();
     }
+
+    public IUnitOfWork UnitOfWork { get; }
 
     public override async Task<TEntity> AddAsync(
         TEntity entity, 
@@ -22,6 +26,12 @@ internal abstract class Repository<TEntity>
     {
         await _dbset.AddAsync(entity, cancellationToken);
         return entity;
+    }
+
+    public override Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+       _dbset.Update(entity);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> AnyAsync(

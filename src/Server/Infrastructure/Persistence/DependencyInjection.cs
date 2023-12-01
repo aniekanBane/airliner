@@ -20,26 +20,32 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<AuditSaveInterceptor>();
+        services.AddScoped<DomainEventInterceptor>();
 
         services.AddDbContext<AMSDbContext>((sp, options) =>
         {
-            options.UseNpgsql(AMSDbContext
-                .AMSSource((ConnectionString)configuration.GetConnectionString("AMSConn")));
+            options.UseNpgsql(AMSDbContext.DataSource(
+                (ConnectionString)configuration.GetConnectionString("AMSConn"))
+            );
 
             var auditInt = sp.GetRequiredService<AuditSaveInterceptor>();
-            options.AddInterceptors(auditInt);
+            var domainEventInt = sp.GetRequiredService<DomainEventInterceptor>();
+            options.AddInterceptors(auditInt, domainEventInt);
         }).AddTransient<IDatabaseSeeder, AMSDbContextSeeder>();
 
         services.AddDbContext<ARSDbContext>((sp, options) => 
         {
-            options.UseNpgsql(ARSDbContext
-                .ARSSource((ConnectionString)configuration.GetConnectionString("ARSConn")), o =>
+            options.UseNpgsql(ARSDbContext.DataSource((
+                ConnectionString)configuration.GetConnectionString("ARSConn")), 
+                o =>
                 {
                     o.UseNodaTime();
-                });
+                }
+            );
 
             var auditInt = sp.GetRequiredService<AuditSaveInterceptor>();
-            options.AddInterceptors(auditInt);
+            var domainEventInt = sp.GetRequiredService<DomainEventInterceptor>();
+            options.AddInterceptors(auditInt, domainEventInt);
         }).AddTransient<IDatabaseSeeder, ARSDbContextSeeder>();
 
         services.AddKeyedScoped(typeof(IReadRepository<>), "ars", typeof(ARSRepository<>));

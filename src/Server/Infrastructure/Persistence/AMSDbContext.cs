@@ -6,11 +6,22 @@ using Npgsql;
 
 namespace Persistence;
 
-public sealed class AMSDbContext(DbContextOptions<AMSDbContext> options) : DbContext(options)
+internal sealed class AMSDbContext(DbContextOptions<AMSDbContext> options) 
+    : DbContextUnitOfWork<AMSDbContext>(options)
 {
     public DbSet<Aircraft> Aircrafts => Set<Aircraft>();
     public DbSet<AircraftType> AircraftTypes => Set<AircraftType>();
 
+    public static NpgsqlDataSource DataSource(string conn)
+    {
+        var sourceBuiler = new NpgsqlDataSourceBuilder(conn);
+
+        sourceBuiler.MapEnum<AircraftStatus>();
+        sourceBuiler.MapEnum<CabinClass>();
+
+        return sourceBuiler.Build();
+    }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -20,15 +31,5 @@ public sealed class AMSDbContext(DbContextOptions<AMSDbContext> options) : DbCon
 
         modelBuilder.HasPostgresEnum<CabinClass>();
         modelBuilder.HasPostgresEnum<AircraftStatus>();
-    }
-
-    public static NpgsqlDataSource AMSSource(string conn)
-    {
-        var sourceBuiler = new NpgsqlDataSourceBuilder(conn);
-
-        sourceBuiler.MapEnum<AircraftStatus>();
-        sourceBuiler.MapEnum<CabinClass>();
-
-        return sourceBuiler.Build();
     }
 }

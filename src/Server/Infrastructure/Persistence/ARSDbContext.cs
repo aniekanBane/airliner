@@ -8,12 +8,26 @@ using Npgsql;
 
 namespace Persistence;
 
-internal sealed class ARSDbContext(DbContextOptions<ARSDbContext> options) : DbContext(options)
+internal sealed class ARSDbContext(DbContextOptions<ARSDbContext> options) 
+    : DbContextUnitOfWork<ARSDbContext>(options)
 {
     public DbSet<City> Cities => Set<City>();
     public DbSet<Airport> Airports => Set<Airport>();
     public DbSet<Flight> Flights => Set<Flight>();
     public DbSet<FlightRoute> FlightRoutes => Set<FlightRoute>();
+
+    public static NpgsqlDataSource DataSource(string conn)
+    {
+        var sourceBuiler = new NpgsqlDataSourceBuilder(conn);
+
+        sourceBuiler.UseNodaTime();
+        sourceBuiler.MapEnum<RouteStatus>();
+        sourceBuiler.MapEnum<FlightStatus>();
+        sourceBuiler.MapEnum<FlightType>();
+        sourceBuiler.MapEnum<CabinClass>();
+
+        return sourceBuiler.Build();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,18 +42,5 @@ internal sealed class ARSDbContext(DbContextOptions<ARSDbContext> options) : DbC
         modelBuilder.HasPostgresEnum<FlightStatus>();
         modelBuilder.HasPostgresEnum<FlightType>();
         modelBuilder.HasPostgresEnum<CabinClass>();
-    }
-
-    public static NpgsqlDataSource ARSSource(string conn)
-    {
-        var sourceBuiler = new NpgsqlDataSourceBuilder(conn);
-
-        sourceBuiler.UseNodaTime();
-        sourceBuiler.MapEnum<RouteStatus>();
-        sourceBuiler.MapEnum<FlightStatus>();
-        sourceBuiler.MapEnum<FlightType>();
-        sourceBuiler.MapEnum<CabinClass>();
-
-        return sourceBuiler.Build();
     }
 }
