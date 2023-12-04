@@ -1,10 +1,8 @@
-﻿using Application.Abstractions.Common;
-using Application.Abstractions.Database;
+﻿using Application.Abstractions.Database;
 using Domain.Primitives.Repositories;
 using Domain.Primitives.ValueObjects;
 using Persistence.Interceptors;
 using Persistence.Repositories;
-using Persistence.Services.Common;
 using Persistence.Services.Database;
 
 using Microsoft.Extensions.Configuration;
@@ -53,8 +51,6 @@ public static class DependencyInjection
 
         services.AddKeyedScoped(typeof(IReadRepository<>), "ams", typeof(AMSRepository<>));
         services.AddKeyedScoped(typeof(IWriteRepository<>), "ams", typeof(AMSRepository<>));
-
-        services.AddTransient<ITimeProvider, SystemTimeProvider>();
 
         return services;
     }
