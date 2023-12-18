@@ -39,6 +39,8 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
     
     public AircraftStatus AircraftStatus { get; private set; }
 
+    public int NumberOfCabins { get => Cabins.Count; private set {} }
+
     public IReadOnlyCollection<Cabin> Cabins => _cabins.AsReadOnly();
 
     public bool IsPending => AircraftStatus is AircraftStatus.Pending;
@@ -49,13 +51,15 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
         string registrationNumber, 
         AircraftStatus aircraftStatus)
     {   
-        return new Aircraft(
+        var aircraft = new Aircraft(
             (AircraftName)name,
             (AircraftCapacity)capacity, 
             (AircrafModel)aircraftModel, 
             (RegistrationNumber)registrationNumber,
             aircraftStatus
         );
+        
+        return aircraft;
     }
 
     public void ApplyMalfunction()
