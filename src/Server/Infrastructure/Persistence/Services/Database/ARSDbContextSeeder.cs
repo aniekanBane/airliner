@@ -3,6 +3,9 @@ using Domain.Entities.AMS.Aircrafts;
 using Domain.Entities.ARS.DestinationAggregate;
 using Domain.Entities.ARS.FlightAggregate;
 using Domain.Entities.ARS.FlightRoute;
+using Domain.Entities.Shared.Storage;
+using Domain.Infrastructure.Storage;
+using Domain.Utilities;
 using NodaTime.Extensions;
 using Airport = (string iata, string icao, string name, string timeZone, string[] terminals);
 
@@ -10,19 +13,38 @@ namespace Persistence.Services.Database;
 
 internal sealed class ARSDbContextSeeder(
     ARSDbContext dbContext,
-    AMSDbContext amsDbContext
+    AMSDbContext amsDbContext,
+    IFileStorageProvider storageProvider
     /*IAppLogger<ARSDbContextSeeder> logger*/) : IDatabaseSeeder
 {
     private readonly ARSDbContext _dbContext = dbContext;
     private readonly AMSDbContext _amsDbContext = amsDbContext;
+    private readonly IFileStorageProvider _storageProvider = storageProvider;
+
     //private readonly IAppLogger<ARSDbContextSeeder> _logger = logger;
 
     private readonly ImmutableArray<City> cities = [
-        City.Create("Uyo", "Nigeria", string.Empty, []),
-        City.Create("Abuja", "Nigeria", string.Empty, []),
-        City.Create("Lagos", "Nigeria", string.Empty, []),
-        City.Create("Port Harcourt", "Nigeria", string.Empty, []),
-        City.Create("Accra", "Ghana", string.Empty, [])
+        City.Create("Uyo", "Nigeria", string.Empty),
+        City.Create("Abuja", "Nigeria", string.Empty),
+        City.Create("Lagos", "Nigeria", string.Empty),
+        City.Create("Port Harcourt", "Nigeria", string.Empty),
+        City.Create("Accra", "Ghana", string.Empty)
+    ];
+
+    private readonly ImmutableArray<ImmutableArray<string>> cityImages = [
+        [
+            "https://static.wixstatic.com/media/7c541c_960b2a66f9a843b6b31f187a624b519f~mv2.jpg/v1/fill/w_640,h_400,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/7c541c_960b2a66f9a843b6b31f187a624b519f~mv2.jpg",
+            "https://www.ibomair.com/wp-content/uploads/2022/01/hl81gtkfqex41.jpg",
+            "https://pbs.twimg.com/media/EvJW41RXIAYtGvf.jpg"
+        ],
+        [ "https://cdn.vanguardngr.com/wp-content/uploads/2023/03/Abuja-city-FCT-1024x577-1.jpg" ],
+        [
+            "https://p.ledinside.com/led/2014-07/1405394271_95189.jpg",
+            "https://cdn.vanguardngr.com/wp-content/uploads/2023/08/Lekki-Ikoyi-link-bridge.jpg", 
+            "https://weetracker.com/wp-content/uploads/2018/10/lagos.jpg"
+        ],
+        [ "https://www.thedreamafrica.com/wp-content/uploads/2023/07/Port-Harcourt-Pleasure-Park.jpg" ],
+        [ "https://blog.ojimah.com/wp-content/uploads/2022/06/1-Independence-Square-AccraGhana-resized-1.jpg" ],
     ];
 
     private readonly ImmutableArray<Airport> airports = [
@@ -114,6 +136,8 @@ internal sealed class ARSDbContextSeeder(
         _dbContext.Database.EnsureDeleted();
         _dbContext.Database.EnsureCreated();
 
+        _storageProvider.ClearAsync().GetAwaiter().GetResult();
+
         using var tx = _dbContext.Database.BeginTransaction();
 
         SeedDestinations();
@@ -138,8 +162,25 @@ internal sealed class ARSDbContextSeeder(
             return;
         }
 
-        foreach(var (city, airport) in Enumerable.Zip(cities, airports))
+        foreach(var (city, images, airport) in Enumerable.Zip(cities, cityImages, airports))
         {
+            foreach (var image in images)
+            {
+                using var stream = new MemoryStream();
+                if (image.StartsWith("http"))
+                    stream.Write(FileHandler.DownloadFromUrlAsync(image).GetAwaiter().GetResult());
+                else
+                    stream.CopyTo(FileHandler.DownloadFromLocal(image));
+
+                if (stream.Length == 0)
+                    continue;
+
+                var file = FileEntry.Create(stream.Length, image, FileType.Image, city.Name.ToLower());
+                _dbContext.FileEntries.Add(file);
+                _storageProvider.UploadAsync(file, stream).GetAwaiter().GetResult();
+                city.AddImage(file.FileLocation);
+            }
+
             city.AddAirport(
                 airport.iata, 
                 airport.icao, 
@@ -216,7 +257,6 @@ internal sealed class ARSDbContextSeeder(
                     _dbContext.Add(newFlight);
                 }
             }
-
         }
     }
 

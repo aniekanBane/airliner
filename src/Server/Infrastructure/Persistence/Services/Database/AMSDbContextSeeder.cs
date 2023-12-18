@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Application.Abstractions.Database;
+﻿using Application.Abstractions.Database;
 using Domain.Entities.AMS.Aircrafts;
 using Domain.Entities.AMS.AircraftTypes;
 

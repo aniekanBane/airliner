@@ -1,13 +1,17 @@
 ﻿using Domain.Entities.AMS.Aircrafts;
 using Domain.Entities.AMS.AircraftTypes;
 using Persistence.Configurations;
+using Persistence.Interceptors;
 
 using Npgsql;
 
 namespace Persistence;
 
-internal sealed class AMSDbContext(DbContextOptions<AMSDbContext> options) 
-    : DbContextUnitOfWork<AMSDbContext>(options)
+internal sealed class AMSDbContext(
+    DbContextOptions<AMSDbContext> options,
+    AuditSaveInterceptor auditSaveInterceptor,
+    DomainEventToOutboxMessageInterceptor outboxMessageInterceptor
+) : DbContextUnitOfWork<AMSDbContext>(options, auditSaveInterceptor, outboxMessageInterceptor)
 {
     public DbSet<Aircraft> Aircrafts => Set<Aircraft>();
     public DbSet<AircraftType> AircraftTypes => Set<AircraftType>();

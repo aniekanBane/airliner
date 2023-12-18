@@ -5,20 +5,14 @@ using Domain.Primitives.Repositories;
 
 namespace Persistence.Repositories;
 
-internal abstract class Repository<TEntity, TDbContext>
-    : RepositoryBase<TEntity>, IReadRepository<TEntity>, IWriteRepository<TEntity>
+internal abstract class Repository<TEntity, TDbContext>(TDbContext dbContext)
+    : RepositoryBase<TEntity>(dbContext), IReadRepository<TEntity>, IWriteRepository<TEntity>
     where TEntity : class, IEntity, IAggregateRoot
     where TDbContext : DbContext, IUnitOfWork
 {
-    protected readonly DbSet<TEntity> _dbset;
+    protected readonly DbSet<TEntity> _dbset = dbContext.Set<TEntity>();
 
-    protected Repository(TDbContext dbContext) : base(dbContext)
-    {
-        UnitOfWork = dbContext;
-        _dbset = dbContext.Set<TEntity>();
-    }
-
-    public IUnitOfWork UnitOfWork { get; }
+    public IUnitOfWork UnitOfWork { get; } = dbContext;
 
     public override async Task<TEntity> AddAsync(
         TEntity entity, 
@@ -53,5 +47,21 @@ internal abstract class Repository<TEntity, TDbContext>
         CancellationToken cancellationToken = default)
     {
         return await _dbset.Where(predicate).ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public async Task<TUnMapped?> SqlQueryAsync<TUnMapped>(
+        FormattableString sql, 
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Database
+            .SqlQuery<TUnMapped>(sql)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<TUnMapped>> SqlQueryListAsync<TUnMapped>(
+        FormattableString sql, 
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Database.SqlQuery<TUnMapped>(sql).ToListAsync(cancellationToken);
     }
 }

@@ -17,4 +17,14 @@ public interface IReadRepository<TEntity> : IReadRepositoryBase<TEntity>
         Expression<Func<TEntity, bool>> predicate, 
         CancellationToken cancellationToken = default
     );
+
+    Task<TUnMapped?> SqlQueryAsync<TUnMapped>(
+        FormattableString sql, 
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IEnumerable<TUnMapped>> SqlQueryListAsync<TUnMapped>(
+        FormattableString sql, 
+        CancellationToken cancellationToken = default
+    );
 }

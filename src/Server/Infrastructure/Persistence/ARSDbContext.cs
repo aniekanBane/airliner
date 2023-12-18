@@ -3,13 +3,17 @@ using Domain.Entities.ARS.DestinationAggregate;
 using Domain.Entities.ARS.FlightAggregate;
 using Domain.Entities.ARS.FlightRoute;
 using Persistence.Configurations;
+using Persistence.Interceptors;
 
 using Npgsql;
 
 namespace Persistence;
 
-internal sealed class ARSDbContext(DbContextOptions<ARSDbContext> options) 
-    : DbContextUnitOfWork<ARSDbContext>(options)
+internal sealed class ARSDbContext(
+    DbContextOptions<ARSDbContext> options,
+    AuditSaveInterceptor auditSaveInterceptor,
+    DomainEventToOutboxMessageInterceptor outboxMessageInterceptor
+) : DbContextUnitOfWork<ARSDbContext>(options, auditSaveInterceptor, outboxMessageInterceptor)
 {
     public DbSet<City> Cities => Set<City>();
     public DbSet<Airport> Airports => Set<Airport>();
