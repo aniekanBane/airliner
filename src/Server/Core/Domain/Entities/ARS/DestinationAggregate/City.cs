@@ -28,7 +28,11 @@ public sealed class City : AuditableEntity<string>, IAggregateRoot
 
     public bool IsHub { get => Airports.Any(x => x.IsHub); private set{} }
 
-    public string Thumbnail { get;  private set; } = string.Empty;
+    public string Thumbnail 
+    { 
+        get => Images.FirstOrDefault() ?? string.Empty;  
+        private set {}
+    }
 
     public int NumberOfAirports { get => Airports.Count; private set {}}
 
@@ -39,36 +43,31 @@ public sealed class City : AuditableEntity<string>, IAggregateRoot
     public static City Create(
         string name, 
         string country, 
-        string summary, 
-        ImmutableArray<string> images)
+        string summary)
     {
-        var city = new City((CityName)name, (CountryName)country, summary);
-
-        if (images.Any())
-        {
-            foreach(var path in images)
-                city.AddImage(path);
-
-            city.SetThumbnail(images.First());
-        }
-
-        return city;
+        return new City((CityName)name, (CountryName)country, summary);
     }
 
     public void UpdateDetails(string name, string country)
     {
-        Name = (CityName)name;
-        Country = (CountryName)country;
+        if (!name.Equals(Name, StringComparison.OrdinalIgnoreCase))
+            Name = (CityName)name;
+        
+        if (!country.Equals(Country, StringComparison.OrdinalIgnoreCase))
+            Country = (CountryName)country;
     }
 
-    public void AddImage(string? uri)
+    public void AddImage(string uri)
     {
-        _images.Add((PictureUri)uri);
+        if (Images.Count == 6) return;
+
+        if (!Images.Contains(uri))
+            _images.Add(uri);
     }
 
-    public bool RemoveImage(string? uri)
+    public void RemoveImage(string? uri)
     {
-        return _images.Remove((PictureUri)uri);
+        _images.RemoveAll(x => x == uri);
     }
 
     public bool AddAirport(
@@ -96,7 +95,9 @@ public sealed class City : AuditableEntity<string>, IAggregateRoot
 
     public void SetThumbnail(string image)
     {
-        Thumbnail = (PictureUri)image;
+        DomainException.ThrowIfNullOrWhiteSpace(image, nameof(image));
+
+        Thumbnail = image;
     }
 
     public bool RemoveAirport(string iataCode)
@@ -108,6 +109,9 @@ public sealed class City : AuditableEntity<string>, IAggregateRoot
 
     public void UpdateSummary(string summary)
     {
+        if (summary.Equals(Summary, StringComparison.OrdinalIgnoreCase))
+            return;
+
         DomainException.ThrowIfNullOrWhiteSpace(summary, nameof(summary));
 
         Summary = summary;

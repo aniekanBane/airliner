@@ -1,5 +1,10 @@
 ﻿namespace Domain.Primitives.Results;
 
+public interface IPaginatedResult<T> : IResult<ImmutableList<T>>
+{
+    Pagination Pagination { get; }
+}
+
 public interface IResult<T> : IResult
 {
     T? Data { get; }
