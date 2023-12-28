@@ -9,10 +9,16 @@ internal sealed class AircraftConfiguration : IEntityTypeConfiguration<Aircraft>
     public void Configure(EntityTypeBuilder<Aircraft> builder)
     {
         builder.HasIndex(x => x.Name).IsUnique();
-        builder.Property(x => x.Name).HasMaxLength(64).IsRequired();
+
+        builder.Property(x => x.Name)
+            .HasMaxLength(64)
+            .IsRequired();
 
         builder.HasIndex(x => x.RegistrationNumber).IsUnique();
-        builder.Property(x => x.RegistrationNumber).IsRequired();
+        
+        builder.Property(x => x.RegistrationNumber)
+            .HasMaxLength(8)
+            .IsRequired();
 
         builder.Property(x => x.AircraftTypeModel).IsRequired();
 
@@ -28,9 +34,14 @@ internal sealed class AircraftTypeConfiguration : IEntityTypeConfiguration<Aircr
     public void Configure(EntityTypeBuilder<AircraftType> builder)
     {
         builder.HasIndex(x => x.Model).IsUnique();
-        builder.Property(x => x.Model).IsRequired();
 
-        builder.Property(x => x.Manufacturer).IsRequired();
+        builder.Property(x => x.Model)
+            .HasField("_model")
+            .IsRequired();
+
+        builder.Property(x => x.Manufacturer)
+            .HasField("_manufacturer")
+            .IsRequired();
 
         builder.HasMany(x => x.Aircrafts)
             .WithOne()
