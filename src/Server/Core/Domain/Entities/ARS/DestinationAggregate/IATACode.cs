@@ -12,7 +12,7 @@ public sealed record class IATACode(string Value) : StringObject<IATACode>(Value
     public new static IATACode From(string? value)
     {
         DomainException.ThrowIfNullOrWhiteSpace(value, nameof(IATACode));
-        DomainException.ThrowIfNotEqual(value!.Length, lenght, nameof(IATACode.lenght));
+        DomainException.ThrowIfNotEqual(value!.Length, lenght, nameof(IATACode));
 
         return new IATACode(value);
     }

@@ -12,7 +12,7 @@ public sealed record class ICAOCode(string Value) : StringObject<ICAOCode>(Value
     public new static ICAOCode From(string? value)
     {
         DomainException.ThrowIfNullOrWhiteSpace(value, nameof(ICAOCode));
-        DomainException.ThrowIfNotEqual(value!.Length, lenght, nameof(ICAOCode.lenght));
+        DomainException.ThrowIfNotEqual(value!.Length, lenght, nameof(ICAOCode));
         
         return new ICAOCode(value);
     }
