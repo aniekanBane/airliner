@@ -17,6 +17,8 @@ internal sealed class FlightRouteConfiguration : IEntityTypeConfiguration<Flight
             .IsFixedLength()
             .IsRequired();
 
+        builder.Property(x => x.BasePrice).HasField("_basePrice");
+
         builder.HasIndex(x => new { x.DepartureAirportCode, x.ArrivalAirportCode })
             .IsUnique();
     }

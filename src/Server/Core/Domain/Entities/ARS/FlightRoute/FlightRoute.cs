@@ -5,12 +5,18 @@ namespace Domain.Entities.ARS.FlightRoute;
 
 public sealed class FlightRoute : AuditableEntity<Guid>, IAggregateRoot
 {
-    private FlightRoute(string departureAirportCode, string arrivalAirportCode)
+    private decimal _basePrice;
+
+    private FlightRoute(decimal basePrice, string departureAirportCode, string arrivalAirportCode)
     {
+        _basePrice = basePrice;
+
         DepartureAirportCode = departureAirportCode;
         ArrivalAirportCode = arrivalAirportCode;
         RouteStatus = RouteStatus.Active;
     }
+
+    public decimal BasePrice => _basePrice;
 
     public string DepartureAirportCode { get; private set; }
 
@@ -23,13 +29,20 @@ public sealed class FlightRoute : AuditableEntity<Guid>, IAggregateRoot
     public bool IsClosed => RouteStatus == RouteStatus.Closed;
 
     public static FlightRoute Create(
+        decimal basePrice,
         string? departureAirportCode, 
         string? arrivalAirportCode)
     {
         return new FlightRoute(
+            basePrice,
             (IATACode)departureAirportCode, 
             (IATACode)arrivalAirportCode
         );
+    }
+
+    internal void UpdatePrice(decimal newPrice)
+    {
+        _basePrice = newPrice;
     }
 
     public void CloseRoute()
