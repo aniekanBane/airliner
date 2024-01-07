@@ -54,7 +54,7 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
         var aircraft = new Aircraft(
             (AircraftName)name,
             (AircraftCapacity)capacity, 
-            (AircrafModel)aircraftModel, 
+            (AircraftModel)aircraftModel, 
             (RegistrationNumber)registrationNumber,
             aircraftStatus
         );
@@ -104,14 +104,6 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
         return _cabins.RemoveAll(x => x.CabinClass == cabinClass) == 1;
     }
 
-    private void SetId()
-    {
-        Id = prefix + RandomGenerator.GenerateRandomString(8);
-
-        if (string.IsNullOrWhiteSpace(Id))
-            throw new DomainException("null id!");
-    }
-
     private bool CanGround()
     {
         return AircraftStatus is AircraftStatus.Pending or AircraftStatus.InMaintenance;
@@ -120,6 +112,14 @@ public sealed class Aircraft : AuditableEntity<string>, IAggregateRoot
     private bool CanAddCabin(int capacity)
     {
         return capacity <= (Capacity - Cabins.Sum(x => x.Capacity));
+    }
+
+    private void SetId()
+    {
+        Id = prefix + RandomGenerator.GenerateRandomString(8);
+
+        if (string.IsNullOrWhiteSpace(Id))
+            throw new DomainException("null id!");
     }
 }
 

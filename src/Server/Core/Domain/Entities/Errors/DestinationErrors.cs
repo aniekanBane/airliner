@@ -2,7 +2,7 @@
 
 namespace Domain.Entities.Errors;
 
-public static partial class DomainErrors
+public static partial class DomainErrors 
 {
     public static class Airport
     {

@@ -56,14 +56,14 @@ internal sealed class ARSDbContextSeeder(
     ];
 
     private readonly ImmutableArray<FlightRoute> flightRoutes = [
-        FlightRoute.Create("QUO", "ABV"),
-        FlightRoute.Create("ABV", "QUO"),
-        FlightRoute.Create("QUO", "LOS"),
-        FlightRoute.Create("LOS", "QUO"),
-        FlightRoute.Create("LOS", "ABV"),
-        FlightRoute.Create("ABV", "LOS"),
-        FlightRoute.Create("LOS", "ACC"),
-        FlightRoute.Create("ACC", "LOS")
+        FlightRoute.Create(60_000, "QUO", "ABV"),
+        FlightRoute.Create(60_000, "ABV", "QUO"),
+        FlightRoute.Create(73_000, "QUO", "LOS"),
+        FlightRoute.Create(73_000, "LOS", "QUO"),
+        FlightRoute.Create(80_000, "LOS", "ABV"),
+        FlightRoute.Create(80_000, "ABV", "LOS"),
+        FlightRoute.Create(155_000, "LOS", "ACC"),
+        FlightRoute.Create(155_000, "ACC", "LOS")
     ];
 
     private readonly ImmutableArray<FlightSeeder> flights = [
